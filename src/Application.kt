@@ -76,6 +76,37 @@ fun Application.module() {
                 call.respond(HighscoreResponse(entityId.value, request.highscore, userIdPrincipal.name))
             }
         }
+
+        resource("styles.css", "styles.css")
+
+        get("/highscores") {
+            call.respondHtml {
+                head {
+                    link(rel = "stylesheet", href = "/styles.css", type = "text/css")
+                    title { "Highscores" }
+                }
+                body {
+                    table {
+                        thead {
+                            tr {
+                                th { text("User") }
+                                th {
+                                    text("Highscore") }
+                            }
+                        }
+                        for (highscoreResponse in getHighscoreList())
+                            tr {
+                                td {
+                                    text(highscoreResponse.username)
+                                }
+                                td {
+                                    text(highscoreResponse.highscore)
+                                }
+                            }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -99,4 +130,24 @@ fun initDB() {
 object HighScoreDao : IntIdTable("highscore") {
     val highscore = integer("highscore")
     val username = text("username")
+}
+
+
+private fun getHighscoreList(): List<HighscoreResponse> {
+    val highscores: ArrayList<HighscoreResponse> = arrayListOf()
+    transaction {
+        HighScoreDao.selectAll().orderBy(HighScoreDao.highscore to SortOrder.DESC)
+            .map { row ->
+                highscores.add(toMessageResponse(row))
+            }
+    }
+    return highscores
+}
+
+private fun toMessageResponse(row: ResultRow): HighscoreResponse {
+    return HighscoreResponse(
+        id = row[HighScoreDao.id].value,
+        highscore = row[HighScoreDao.highscore],
+        username = row[HighScoreDao.username]
+    )
 }
