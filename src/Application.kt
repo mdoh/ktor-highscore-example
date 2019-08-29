@@ -64,20 +64,22 @@ fun Application.module() {
     install(Routing) {
         authenticate("userAuth") {
             post("highscore") {
+                val userIdPrincipal = call.authentication.principal as UserIdPrincipal
                 val request = call.receive<HighscoreRequest>()
                 val entityId =
                     transaction {
                         HighScoreDao.insertAndGetId {
                             it[highscore] = request.highscore
+                            it[username] = userIdPrincipal.name
                         }
                     }
-                call.respond(HighscoreResponse(entityId.value, request.highscore))
+                call.respond(HighscoreResponse(entityId.value, request.highscore, userIdPrincipal.name))
             }
         }
     }
 }
 
-data class HighscoreResponse(val id: Int, val highscore: Int)
+data class HighscoreResponse(val id: Int, val highscore: Int, val username: String)
 data class HighscoreRequest(val highscore: Int)
 
 fun initDB() {
@@ -96,4 +98,5 @@ fun initDB() {
 
 object HighScoreDao : IntIdTable("highscore") {
     val highscore = integer("highscore")
+    val username = text("username")
 }
