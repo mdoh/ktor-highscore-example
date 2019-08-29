@@ -30,6 +30,7 @@ import javax.naming.AuthenticationException
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module() {
+    initDB()
     install(StatusPages) {
         exception<Throwable> { e ->
             call.respondText(
@@ -48,10 +49,34 @@ fun Application.module() {
     install(Routing) {
         post("highscore") {
             val request = call.receive<HighscoreRequest>()
-            call.respond(request)
+            val entityId =
+                transaction {
+                    HighScoreDao.insertAndGetId {
+                        it[highscore] = request.highscore
+                    }
+                }
+            call.respond(HighscoreResponse(entityId.value, request.highscore))
         }
     }
 }
 
-data class HighscoreResponse(val highscore: Int)
+data class HighscoreResponse(val id: Int, val highscore: Int)
 data class HighscoreRequest(val highscore: Int)
+
+fun initDB() {
+    val config = HikariConfig()
+    config.driverClassName = "org.h2.Driver"
+    config.jdbcUrl = "jdbc:h2:mem:test"
+    config.validate()
+    val ds = HikariDataSource(config)
+    Database.connect(ds)
+
+    transaction {
+        SchemaUtils.create(HighScoreDao)
+    }
+
+}
+
+object HighScoreDao : IntIdTable("highscore") {
+    val highscore = integer("highscore")
+}
