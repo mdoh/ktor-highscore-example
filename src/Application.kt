@@ -46,10 +46,12 @@ fun Application.module() {
         gson()
     }
     install(Routing) {
-        get("highscore") {
-            call.respond(HighscoreResponse(1))
+        post("highscore") {
+            val request = call.receive<HighscoreRequest>()
+            call.respond(request)
         }
     }
 }
 
 data class HighscoreResponse(val highscore: Int)
+data class HighscoreRequest(val highscore: Int)
