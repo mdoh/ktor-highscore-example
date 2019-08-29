@@ -1,0 +1,36 @@
+GET http://localhost:8080/highscore
+
+###
+
+POST http://localhost:8080/highscore
+Content-Type: application/json
+
+{
+  "highscore": 1
+}
+
+###
+
+POST http://localhost:8080/highscore
+Content-Type: application/json
+Authorization: Basic bWFyY2VsOmVudGVy
+
+{
+  "highscore": 10
+}
+
+###
+
+POST http://localhost:8080/highscore
+Content-Type: application/json
+Authorization: Basic cGV0ZXI6ZW50ZXI=
+
+{
+  "highscore": 100
+}
+
+###
+
+GET http://localhost:8080/highscores
+
+###
