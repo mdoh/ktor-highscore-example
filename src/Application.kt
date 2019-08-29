@@ -46,16 +46,33 @@ fun Application.module() {
     install(ContentNegotiation) {
         gson()
     }
-    install(Routing) {
-        post("highscore") {
-            val request = call.receive<HighscoreRequest>()
-            val entityId =
-                transaction {
-                    HighScoreDao.insertAndGetId {
-                        it[highscore] = request.highscore
-                    }
+    install(Authentication) {
+        basic(name = "userAuth") {
+            validate { (name, password) ->
+                if (name == "marcel" && password == "enter") {
+                    UserIdPrincipal(name)
                 }
-            call.respond(HighscoreResponse(entityId.value, request.highscore))
+                else if (name == "peter" && password == "enter") {
+                    UserIdPrincipal(name)
+                }
+                else {
+                    null
+                }
+            }
+        }
+    }
+    install(Routing) {
+        authenticate("userAuth") {
+            post("highscore") {
+                val request = call.receive<HighscoreRequest>()
+                val entityId =
+                    transaction {
+                        HighScoreDao.insertAndGetId {
+                            it[highscore] = request.highscore
+                        }
+                    }
+                call.respond(HighscoreResponse(entityId.value, request.highscore))
+            }
         }
     }
 }
