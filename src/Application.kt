@@ -42,6 +42,9 @@ fun Application.module() {
             call.respond(HttpStatusCode.Unauthorized)
         }
     }
+    install(ContentNegotiation) {
+        gson()
+    }
     install(Routing) {
         get("highscore") {
             call.respond(HighscoreResponse(1))
