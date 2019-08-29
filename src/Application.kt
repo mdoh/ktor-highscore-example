@@ -30,6 +30,18 @@ import javax.naming.AuthenticationException
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module() {
+    install(StatusPages) {
+        exception<Throwable> { e ->
+            call.respondText(
+                e.localizedMessage,
+                ContentType.Text.Plain,
+                HttpStatusCode.InternalServerError
+            )
+        }
+        exception<AuthenticationException> {
+            call.respond(HttpStatusCode.Unauthorized)
+        }
+    }
     install(Routing) {
         get("highscore") {
             call.respond(HighscoreResponse(1))
