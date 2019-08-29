@@ -30,6 +30,10 @@ import javax.naming.AuthenticationException
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 fun Application.module() {
-
+    install(Routing) {
+        get("highscore") {
+            call.respond("your highscore is 1")
+        }
+    }
 }
 
