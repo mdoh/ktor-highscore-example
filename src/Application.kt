@@ -32,8 +32,9 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module() {
     install(Routing) {
         get("highscore") {
-            call.respond("your highscore is 1")
+            call.respond(HighscoreResponse(1))
         }
     }
 }
 
+data class HighscoreResponse(val highscore: Int)
